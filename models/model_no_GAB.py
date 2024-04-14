@@ -58,8 +58,9 @@ class SAB(nn.Module):
         return F.relu(output)
 
     def _init_weights(self):
-        # changed to cpu
-        self.model.load_state_dict(torch.load('checkpoint/ResNet_Pretrain/epoch_99.pth', map_location=torch.device('cpu')), strict=False)
+        self.model.load_state_dict(torch.load('checkpoint/ResNet_Pretrain/epoch_99.pth', map_location=torch.device('cpu')),
+                                    strict=False)
+
 
 class GAB(nn.Module):
     def __init__(self):
@@ -97,18 +98,17 @@ class GAB(nn.Module):
 class SAAN(nn.Module):
     def __init__(self, num_classes) -> None:
         super().__init__()
-        self.GenAes = GAB()
         self.StyAes = SAB()
 
-        self.NLB = NonLocalBlock(in_channels=1536)
+        self.NLB = NonLocalBlock(in_channels=512)
 
         self.max_pool = nn.MaxPool2d(3, stride=2, padding=1)
         self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(2, 2))
 
-        self.bn = nn.BatchNorm2d(num_features=1536)
+        self.bn = nn.BatchNorm2d(num_features=512)
 
         self.predictor = nn.Sequential(
-            nn.Linear(1536 * 4, 2048),
+            nn.Linear(512 * 4, 2048),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.5),
             nn.Linear(2048, num_classes),
@@ -118,13 +118,10 @@ class SAAN(nn.Module):
         self._initial_weights()
 
     def forward(self, x):
-        gen_aes = self.GenAes(x)
         sty_aes = self.StyAes(x)
 
         sty_aes = self.max_pool(sty_aes)
-
-        all_aes = torch.cat((sty_aes, gen_aes), 1)
-        all_aes = self.NLB(all_aes)
+        all_aes = self.NLB(sty_aes)
 
         all_aes = self.avg_pool(all_aes)
         all_aes = self.bn(all_aes)

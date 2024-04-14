@@ -15,9 +15,11 @@ val_dataset = BBDataset(file_dir='dataset', type='validation', test=True)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--device', type=str, default='cuda')
+    # changed to CPU
+    parser.add_argument('--device', type=str, default='cpu')
     parser.add_argument('--lr', type=float, default=1e-5)
-    parser.add_argument('--epoch', type=int, default=100)
+    # changed to 20 epochs
+    parser.add_argument('--epoch', type=int, default=20)
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--checkpoint_dir', type=str,
                         default='checkpoint/SAAN')
