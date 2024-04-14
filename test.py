@@ -17,7 +17,9 @@ test_dataset = BBDataset(file_dir='dataset', type='test', test=True)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--device', type=str, default='cuda')
+    # changed to cpu
+    parser.add_argument('--device', type=str, default='cpu')
+    # change this path if training on own weights
     parser.add_argument('--checkpoint_dir', type=str,
                         default='checkpoint/BAID')
     parser.add_argument('--checkpoint_name', type=str,
@@ -36,7 +38,7 @@ def test(args):
 
     model = SAAN(num_classes=1)
     model = model.to(device)
-    model.load_state_dict(torch.load(checkpoint_path))
+    model.load_state_dict(torch.load(checkpoint_path, map_location=torch.device('cpu')))
     model.eval()
 
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, pin_memory=True, num_workers=8)
